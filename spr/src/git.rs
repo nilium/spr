@@ -23,6 +23,7 @@ pub struct PreparedCommit {
     pub oid: Oid,
     pub short_id: String,
     pub parent_oid: Oid,
+    pub message_text: String,
     pub message: MessageSectionsMap,
     pub pull_request_number: Option<u64>,
 }
@@ -36,7 +37,9 @@ pub struct Git {
 impl Git {
     pub fn new(repo: git2::Repository) -> Self {
         Self {
-            hooks: std::sync::Arc::new(std::sync::Mutex::new(git2_ext::hooks::Hooks::with_repo(&repo).unwrap())),
+            hooks: std::sync::Arc::new(std::sync::Mutex::new(
+                git2_ext::hooks::Hooks::with_repo(&repo).unwrap(),
+            )),
             repo: std::sync::Arc::new(std::sync::Mutex::new(repo)),
         }
     }
@@ -317,7 +320,8 @@ impl Git {
         drop(commit);
         drop(repo);
 
-        let mut message = parse_message(&message, MessageSection::Title);
+        let message_text = message;
+        let mut message = parse_message(&message_text, MessageSection::Title);
 
         let pull_request_number = message
             .get(&MessageSection::PullRequest)
@@ -336,6 +340,7 @@ impl Git {
             oid,
             short_id,
             parent_oid,
+            message_text,
             message,
             pull_request_number,
         })

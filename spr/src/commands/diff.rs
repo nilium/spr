@@ -479,7 +479,10 @@ async fn diff_impl(
         (Some(new_base_branch_commit), Some(base_branch))
     };
 
-    let mut github_commit_message = opts.message.clone();
+    let mut github_commit_message = opts
+        .message
+        .clone()
+        .or_else(|| Some(local_commit.message_text.clone()));
     if pull_request.is_some() && github_commit_message.is_none() {
         let input = {
             let message_on_prompt = message_on_prompt.clone();
